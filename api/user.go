@@ -15,19 +15,46 @@ type UserJSON struct {
 	Password string `json:"password"`
 }
 
-func RegisterUser(w http.ResponseWriter, r *http.Request) {
+type UserPayload struct {
+	ID       int    `json:"id"`
+	Username string `json:"username"`
+}
+
+func (s *Server) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	var user UserJSON
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
 		http.Error(w, "Json Decode Error", http.StatusBadRequest)
 		return
 	}
-	w.Write([]byte("User registered successfully"))
+
+	ctx := r.Context()
+	query := `INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING id`
+
+	err = s.db.QueryRowContext(
+		ctx,
+		query,
+		user.Username,
+		user.Email,
+		user.Password,
+	).Scan(&user.ID)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	response := UserPayload{
+		ID:       user.ID,
+		Username: user.Username,
+	}
+	json.NewEncoder(w).Encode(response)
 }
 
 func validateUserCredentials(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		
+
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -85,5 +112,3 @@ func validatePassword(password string) bool {
 	}
 	return true
 }
-
-
