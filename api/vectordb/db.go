@@ -32,6 +32,11 @@ func (v *VectorDB) Size() int {
 	return len(v.nodes)
 }
 
+type Similarity struct {
+	nodeId     int
+	similarity float64
+}
+
 func (v *VectorDB) SimilaritySearch(vector []float64) []*Node {
 	similarities := make([]Similarity, len(v.nodes))
 	for i, node := range v.nodes {
@@ -42,7 +47,9 @@ func (v *VectorDB) SimilaritySearch(vector []float64) []*Node {
 	}
 
 	// Sort the similarities in descending order
-	sort.Sort(sort.Reverse(BySimilarity(similarities)))
+	sort.Slice(similarities, func(i, j int) bool {
+		return similarities[i].similarity > similarities[j].similarity
+	})
 
 	nodes := make([]*Node, len(v.nodes))
 	for i, similarity := range similarities {
