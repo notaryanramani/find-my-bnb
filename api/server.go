@@ -21,6 +21,13 @@ func NewServer(port string) *Server {
 }
 
 func (s *Server) Run() {
+	// Get Routes
 	s.router.Get("/hello", HelloWord)
-	s.router.Post("/register", s.store.UserStore.ValidateUserCredentials(s.store.UserStore.RegisterUser))
+	s.router.Get("/check", Check)
+
+	// Post Routes
+	s.router.Post("/register", s.createUserHandler)
+
+	// Protected Routes
+	s.router.Post("/login", AuthMiddleware(s.userLoginHandler))
 }

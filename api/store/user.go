@@ -1,11 +1,7 @@
 package store
 
 import (
-	"bytes"
-	"encoding/json"
-	"io"
-	"net/http"
-	"regexp"
+	"context"
 	"database/sql"
 
 	_ "github.com/lib/pq"
@@ -15,10 +11,24 @@ type UserStore struct {
 	db *sql.DB
 }
 
+type User struct {
+	ID       int
+	Name     string
+	Username string
+	Email    string
+	Password []byte
+}
+
 type UserJSON struct {
 	ID       int    `json:"id"`
+	Name     string `json:"name"`
 	Username string `json:"username"`
 	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type UserLogin struct {
+	Username string `json:"username"`
 	Password string `json:"password"`
 }
 
@@ -27,95 +37,37 @@ type UserPayload struct {
 	Username string `json:"username"`
 }
 
-func (u *UserStore) RegisterUser(w http.ResponseWriter, r *http.Request) {
-	var user UserJSON
-	err := json.NewDecoder(r.Body).Decode(&user)
-	if err != nil {
-		http.Error(w, "Json Decode Error", http.StatusBadRequest)
-		return
-	}
+type UserLoginPayload struct {
+	Username string `json:"username"`
+	Token	string `json:"token"`
+}
 
-	ctx := r.Context()
-	query := `INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING id`
+func (u *UserStore) Create(ctx context.Context, user *User) error {
+	query := `INSERT INTO users (name, username, email, password) VALUES ($1, $2, $3, $4) RETURNING id`
 
-	err = u.db.QueryRowContext(
+	err := u.db.QueryRowContext(
 		ctx,
 		query,
+		user.Name,
 		user.Username,
 		user.Email,
 		user.Password,
 	).Scan(&user.ID)
 
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(http.StatusCreated)
-	response := UserPayload{
-		ID:       user.ID,
-		Username: user.Username,
-	}
-	json.NewEncoder(w).Encode(response)
+	return err
 }
 
-func (u *UserStore) ValidateUserCredentials(next http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func (u *UserStore) GetByUsername(ctx context.Context, username string) (*User, error) {
+	query := `SELECT id, name, username, email, password FROM users WHERE username = $1`
 
-		body, err := io.ReadAll(r.Body)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
+	user := &User{}
+	err := u.db.QueryRowContext(ctx, query, username).Scan(
+		&user.ID,
+		&user.Name,
+		&user.Username,
+		&user.Email,
+		&user.Password,
+	)
 
-		var user UserJSON
-		if err := json.Unmarshal(body, &user); err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-
-		if !validateUsername(user.Username) {
-			http.Error(w, "Invalid Username", http.StatusBadRequest)
-			return
-		}
-
-		if !validatePassword(user.Password) {
-			http.Error(w, "Invalid Password", http.StatusBadRequest)
-			return
-		}
-
-		r.Body = io.NopCloser(bytes.NewBuffer(body))
-		next.ServeHTTP(w, r)
-	}
-}
-
-func validateUsername(username string) bool {
-	return len(username) >= 5
-}
-
-func validatePassword(password string) bool {
-	if password == "" {
-		return false
-	}
-
-	if len(password) < 8 {
-		return false
-	}
-
-	upperCaseRegex := regexp.MustCompile(`[A-Z]`)
-	lowerCaseRegex := regexp.MustCompile(`[a-z]`)
-	numberRegex := regexp.MustCompile(`[0-9]`)
-
-	if !upperCaseRegex.MatchString(password) {
-		return false
-	}
-
-	if !lowerCaseRegex.MatchString(password) {
-		return false
-	}
-
-	if !numberRegex.MatchString(password) {
-		return false
-	}
-	return true
+	return user, err
 }

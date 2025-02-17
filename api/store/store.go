@@ -5,7 +5,7 @@ import (
 )
 
 type Store struct{
-	UserStore *UserStore
+	User *UserStore
 }
 
 func NewStore() *Store {
@@ -15,7 +15,7 @@ func NewStore() *Store {
 	}
 
 	return &Store{
-		UserStore: &UserStore{
+		User: &UserStore{
 			db: db,
 		},
 	}
