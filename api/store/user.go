@@ -1,4 +1,4 @@
-package main
+package store
 
 import (
 	"bytes"
@@ -6,7 +6,14 @@ import (
 	"io"
 	"net/http"
 	"regexp"
+	"database/sql"
+
+	_ "github.com/lib/pq"
 )
+
+type UserStore struct {
+	db *sql.DB
+}
 
 type UserJSON struct {
 	ID       int    `json:"id"`
@@ -20,7 +27,7 @@ type UserPayload struct {
 	Username string `json:"username"`
 }
 
-func (s *Server) RegisterUser(w http.ResponseWriter, r *http.Request) {
+func (u *UserStore) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	var user UserJSON
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
@@ -31,7 +38,7 @@ func (s *Server) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	query := `INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING id`
 
-	err = s.db.QueryRowContext(
+	err = u.db.QueryRowContext(
 		ctx,
 		query,
 		user.Username,
@@ -52,7 +59,7 @@ func (s *Server) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
-func validateUserCredentials(next http.HandlerFunc) http.HandlerFunc {
+func (u *UserStore) ValidateUserCredentials(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		body, err := io.ReadAll(r.Body)
