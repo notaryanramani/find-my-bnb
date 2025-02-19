@@ -27,7 +27,8 @@ func (s *Server) Run() {
 
 	// Post Routes
 	s.router.Post("/register", s.createUserHandler)
+	s.router.Post("/login", s.userLoginHandler)
 
 	// Protected Routes
-	s.router.Post("/login", AuthMiddleware(s.userLoginHandler))
+	s.router.Get("/protected", AuthMiddleware(s.protectedHandler))
 }

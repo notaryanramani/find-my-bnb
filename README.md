@@ -6,3 +6,6 @@ Contains the Front End
 
 ## /api
 Contains the Back End
+
+## /embedder
+Contains the Vector Embeddings app
