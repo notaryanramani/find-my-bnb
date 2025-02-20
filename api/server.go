@@ -2,14 +2,17 @@ package main
 
 import (
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/cors"
 	_ "github.com/lib/pq"
 	"github.com/notaryanramani/find-my-bnb/api/store"
+	"github.com/notaryanramani/find-my-bnb/api/utils"
 )
 
 type Server struct {
 	router *chi.Mux
 	port   string
 	store  *store.Store
+	cors *cors.Cors
 }
 
 func NewServer(port string) *Server {
@@ -17,6 +20,7 @@ func NewServer(port string) *Server {
 		router: chi.NewRouter(),
 		port:   port,
 		store:  store.NewStore(),
+		cors: utils.GetCorsMiddleware(),
 	}
 }
 

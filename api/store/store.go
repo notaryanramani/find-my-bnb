@@ -6,6 +6,8 @@ import (
 
 type Store struct{
 	User *UserStore
+	Room *RoomStore
+	Hosts *HostStore
 }
 
 func NewStore() *Store {
@@ -16,6 +18,12 @@ func NewStore() *Store {
 
 	return &Store{
 		User: &UserStore{
+			db: db,
+		},
+		Room: &RoomStore{
+			db: db,
+		},
+		Hosts: &HostStore{
 			db: db,
 		},
 	}

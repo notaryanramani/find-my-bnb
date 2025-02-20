@@ -71,3 +71,28 @@ func (u *UserStore) GetByUsername(ctx context.Context, username string) (*User, 
 
 	return user, err
 }
+
+func (u *UserStore) Update(ctx context.Context, user *User) error {
+	query := `UPDATE users SET name = $1, username = $2, email = $3, password = $4 WHERE id = $5`
+
+	_, err := u.db.ExecContext(
+		ctx,
+		query,
+		user.Name,
+		user.Username,
+		user.Email,
+		user.Password,
+		user.ID,
+	)
+
+	return err
+}
+
+func (u *UserStore) Delete(ctx context.Context, id int) error {
+	query := `DELETE FROM users WHERE id = $1`
+
+	_, err := u.db.ExecContext(ctx, query, id)
+
+	return err
+}
+

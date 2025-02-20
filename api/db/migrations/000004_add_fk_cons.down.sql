@@ -1,0 +1,3 @@
+ALTER TABLE rooms
+DROP CONSTRAINT fk_host_id,
+DROP COLUMN host_id;
