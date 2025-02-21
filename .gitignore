@@ -203,7 +203,9 @@ cython_debug/
 bin/
 tmp/
 persist/
+.DS_Store
 
 # Tailwind File
 package-lock.json
 node_modules/
+output.css
