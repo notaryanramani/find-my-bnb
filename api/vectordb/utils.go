@@ -1,18 +1,18 @@
 package vectordb
 
 import (
+	"database/sql"
 	"math/rand/v2"
 )
 
 func getRandomVector() []float64 {
-	// Generate random vector for the content of 300 floats
-	vector := make([]float64, 300)
-	for i := 0; i < 300; i++ {
+	// Generate random vector for the content of 384 floats
+	vector := make([]float64, 384)
+	for i := 0; i < 384; i++ {
 		vector[i] = rand.Float64()
 	}
 	return vector
 }
-
 
 func MultiplyVectors(v1 []float64, v2 []float64) float64 {
 	v3 := 0.0
@@ -28,4 +28,31 @@ func AddElements(vector []float64) float64 {
 		sum += v
 	}
 	return sum
+}
+
+func queryDB(db *sql.DB) []*DBNode {
+	query := `SELECT id, description, neighborhood_overview FROM rooms`
+
+	rows, err := db.Query(query)
+	if err != nil {
+		return nil
+	}
+	defer rows.Close()
+
+	DBNodes := []*DBNode{}
+	for rows.Next() {
+		DBNode := &DBNode{}
+		err := rows.Scan(
+			&DBNode.ID,
+			&DBNode.Description,
+			&DBNode.NeighborhoodOverview,
+		)
+		if err != nil {
+			return nil
+		}
+
+		DBNodes = append(DBNodes, DBNode)
+	}
+
+	return DBNodes
 }

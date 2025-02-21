@@ -1,12 +1,14 @@
 package store
 
 import (
+	"database/sql"
 	"log"
 )
 
-type Store struct{
-	User *UserStore
-	Room *RoomStore
+type Store struct {
+	DB    *sql.DB
+	User  *UserStore
+	Room  *RoomStore
 	Hosts *HostStore
 }
 
@@ -17,6 +19,7 @@ func NewStore() *Store {
 	}
 
 	return &Store{
+		DB: db,
 		User: &UserStore{
 			db: db,
 		},

@@ -1,7 +1,13 @@
 package vectordb
 
 import (
-	"sort"
+	"database/sql"
+	"log"
+	"os"
+	"strconv"
+
+	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 )
 
 type VectorDB struct {
@@ -12,48 +18,46 @@ type VectorDB struct {
 	nodes []*Node
 }
 
-func InitVectorDB(dim int) *VectorDB {
+func NewVectorDB() *VectorDB {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	dimStr, ok := os.LookupEnv("EMBEDDING_DIM")
+	if !ok {
+		log.Fatal("EMBEDDING_DIM is not set in .env file")
+	}
+
+	dim, err := strconv.Atoi(dimStr)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	return &VectorDB{
 		dim:   dim,
 		nodes: make([]*Node, 0),
 	}
 }
 
-func (v *VectorDB) AddNode(content string) {
-	id := len(v.nodes)
-	vector := getRandomVector() // Change this with a real vector, using HuggingFace embeddings model
-	dbID := len(v.nodes)
-	node := CreateNewNode(id, content, vector, dbID)
+func (v *VectorDB) InitVectorDB(db *sql.DB) {
+	// Steps
+	// 1. Query all the nodes from the database
+	tempNodes := queryDB(db)
 
+	// 2. Get Embeddings for each node and add it to the VectorDB nodes
+	for _, tempNode := range tempNodes {
+		content := tempNode.Description + " " + tempNode.NeighborhoodOverview
+		vector := getEmbeddings(content)
+		v.AddNode(tempNode.ID, content, vector)
+	}
+}
+
+func (v *VectorDB) AddNode(id int64, content string, vector []float64) {
+	node := CreateNewNode(id, content, vector)
 	v.nodes = append(v.nodes, node)
 }
 
 func (v *VectorDB) Size() int {
 	return len(v.nodes)
-}
-
-type Similarity struct {
-	nodeId     int
-	similarity float64
-}
-
-func (v *VectorDB) SimilaritySearch(vector []float64) []*Node {
-	similarities := make([]Similarity, len(v.nodes))
-	for i, node := range v.nodes {
-		similarities[i] = Similarity{
-			nodeId:     node.ID,
-			similarity: node.Similarity(vector),
-		}
-	}
-
-	// Sort the similarities in descending order
-	sort.Slice(similarities, func(i, j int) bool {
-		return similarities[i].similarity > similarities[j].similarity
-	})
-
-	nodes := make([]*Node, len(v.nodes))
-	for i, similarity := range similarities {
-		nodes[i] = v.nodes[similarity.nodeId]
-	}
-	return nodes
 }

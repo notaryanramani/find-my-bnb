@@ -17,7 +17,7 @@ func Check(w http.ResponseWriter, r *http.Request) {
 }
 
 func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request){
+	return func(w http.ResponseWriter, r *http.Request) {
 		tokenString := r.Header.Get("Authorization")
 		if tokenString == "" {
 			http.Error(w, "Unauthorized. Token Missing", http.StatusUnauthorized)
@@ -111,6 +111,40 @@ func (s *Server) userLoginHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(response)
+}
+
+func (s *Server) getRandomRoomsHandler(w http.ResponseWriter, r *http.Request) {
+	var topK store.TopKPayload
+	var err error
+	err = json.NewDecoder(r.Body).Decode(&topK)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	var rooms []*store.Room
+	if topK.Ids == nil {
+		rooms, err = s.store.Room.GetTopKRandom(r.Context(), topK.K)
+	} else if len(topK.Ids) == 0 {
+		w.Header().Set("Warning", "Empty Ids array. Results may contain duplicates.")
+		rooms, err = s.store.Room.GetTopKRandom(r.Context(), topK.K)
+	} else {
+		rooms, err = s.store.Room.NextTopKRandom(r.Context(), topK.K, topK.Ids)
+	}
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	roomsPayload := &store.RoomsPayload{
+		Rooms: rooms,
+	}
+
+	json.NewEncoder(w).Encode(roomsPayload)
 }
 
 func (s *Server) protectedHandler(w http.ResponseWriter, r *http.Request) {

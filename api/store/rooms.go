@@ -45,6 +45,15 @@ type RoomPayload struct {
 	HostID               int64   `json:"host_id"`
 }
 
+type TopKPayload struct {
+	K   int     `json:"k"`
+	Ids []int64 `json:"ids"`
+}
+
+type RoomsPayload struct {
+	Rooms []*Room `json:"rooms"`
+}
+
 func (r *RoomStore) Create(ctx context.Context, room *Room) error {
 	query := `INSERT INTO rooms (id, listing_url, name, description, neighborhood_overview, picture_url, price, bedrooms, beds, room_type, property_type, neighborhood, host_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`
 

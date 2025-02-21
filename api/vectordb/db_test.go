@@ -6,26 +6,29 @@ import (
 )
 
 func TestDBInit(t *testing.T) {
-	db := InitVectorDB(300)
+	db := NewVectorDB()
 	if db == nil {
 		t.Errorf("DB not initialized")
 	}
 }
 
 func TestDBAddNode(t *testing.T) {
-	db := InitVectorDB(300)
-	db.AddNode("test")
+	db := NewVectorDB()
+	vector := getRandomVector()
+	db.AddNode(1, "test", vector)
 	if db.Size() != 1 {
 		t.Errorf("Node insertion failed, expected 1, got %d\n", db.Size())
 	}
 }
 
 func TestDBSimilaritySearch(t *testing.T) {
-	db := InitVectorDB(300)
-	db.AddNode("test")
-	db.AddNode("test2")
-	vector := getRandomVector()
-	nodes := db.SimilaritySearch(vector)
+	db := NewVectorDB()
+	v1 := getRandomVector()
+	v2 := getRandomVector()
+	db.AddNode(1, "test", v1)
+	db.AddNode(2, "test2", v2)
+	text := "test3"
+	nodes := db.SimilaritySearch(text)
 	if len(nodes) != 2 {
 		t.Errorf("Similarity search failed, expected 2, got %d\n", len(nodes))
 	}
@@ -37,7 +40,7 @@ func TestDBSimilaritySearch(t *testing.T) {
 func TestNodeSimilarity(t *testing.T) {
 	vector1 := getRandomVector()
 	vector2 := getRandomVector()
-	node1 := CreateNewNode(1, "test", vector1, 1)
+	node1 := CreateNewNode(1, "test", vector1)
 	similarity := node1.Similarity(vector2)
 
 	if similarity == 0 {

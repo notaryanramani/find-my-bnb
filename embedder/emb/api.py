@@ -20,5 +20,14 @@ def embed():
     text = data['text']
     with torch.no_grad():
         embeddings = model(text).cpu().numpy().tolist()
+    data = {'embedding': embeddings[0]}
+    return jsonify(data)
+
+@app.route('/embed_batch', methods=['POST'])
+def embed_batch():
+    data = request.json
+    texts = data['texts']
+    with torch.no_grad():
+        embeddings = model(texts).cpu().numpy().tolist()
     data = {'embeddings': embeddings}
     return jsonify(data)
