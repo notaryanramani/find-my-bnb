@@ -1,6 +1,8 @@
 {
   "dependencies": {
     "@tailwindcss/cli": "^4.0.8",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
     "tailwindcss": "^4.0.8"
   }
 }
