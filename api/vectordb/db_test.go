@@ -33,7 +33,7 @@ func TestDBSimilaritySearch(t *testing.T) {
 		t.Errorf("Similarity search failed, expected 2, got %d\n", len(nodes))
 	}
 	for _, node := range nodes {
-		fmt.Printf("Node ID: %d, Node Content: %s \n", node.ID, node.content)
+		fmt.Printf("Node ID: %d, Node Content: %s \n", node.ID, node.Content)
 	}
 }
 

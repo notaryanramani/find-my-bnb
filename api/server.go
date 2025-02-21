@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
 	_ "github.com/lib/pq"
@@ -29,7 +31,14 @@ func NewServer(port string) *Server {
 
 func (s *Server) Run() {
 	// Initalize VectorDB
-	s.vectordb.InitVectorDB(s.store.DB)
+	// Check if the VectorDB is already initialized
+	_, err := os.Stat("persist/vectordb.gob")
+	if !os.IsNotExist(err) {
+		// If the file exists, then load the VectorDB from the file
+		s.vectordb = vectordb.LoadVectorDB()
+	} else {
+		s.vectordb.InitVectorDB(s.store.DB)
+	}
 
 	// Get Routes
 	s.router.Get("/hello", HelloWord)
@@ -38,8 +47,9 @@ func (s *Server) Run() {
 	// Post User Routes
 	s.router.Post("/register", s.createUserHandler)
 	s.router.Post("/login", s.userLoginHandler)
-
+	
 	// Post Room Routes
+	s.router.Post("/test-rooms", s.getRandomRoomsHandler)
 	s.router.Post("/rooms", AuthMiddleware(s.getRandomRoomsHandler))
 
 	// Protected Routes

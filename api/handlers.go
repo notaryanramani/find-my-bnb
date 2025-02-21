@@ -122,7 +122,7 @@ func (s *Server) getRandomRoomsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var rooms []*store.Room
+	var rooms []*store.RoomPayload
 	if topK.Ids == nil {
 		rooms, err = s.store.Room.GetTopKRandom(r.Context(), topK.K)
 	} else if len(topK.Ids) == 0 {

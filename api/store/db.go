@@ -1,29 +1,21 @@
 package store
 
 import (
+	"context"
 	"database/sql"
+	"fmt"
 	"log"
 	"os"
 	"time"
-	"context"
 
-	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
-
 )
 
 func NewDB() (*sql.DB, error) {
-
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-		return nil, err
-	}
-
 	addr, ok := os.LookupEnv("DB_ADDR")
 	if !ok {
 		log.Fatal("DB_ADDR is not set in .env file")
-		return nil, err
+		return nil, fmt.Errorf("DB_ADDR is not set in .env file")
 	}
 	db, err := sql.Open("postgres", addr)
 	if err != nil {

@@ -30,7 +30,7 @@ func AddElements(vector []float64) float64 {
 	return sum
 }
 
-func queryDB(db *sql.DB) []*DBNode {
+func queryDB(db *sql.DB) *[]*DBNode {
 	query := `SELECT id, description, neighborhood_overview FROM rooms`
 
 	rows, err := db.Query(query)
@@ -54,5 +54,5 @@ func queryDB(db *sql.DB) []*DBNode {
 		DBNodes = append(DBNodes, DBNode)
 	}
 
-	return DBNodes
+	return &DBNodes
 }

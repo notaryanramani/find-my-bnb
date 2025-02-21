@@ -17,15 +17,15 @@ type Room struct {
 	ID                   int64
 	ListingURL           string
 	Name                 string
-	Description          string
-	NeighborhoodOverview string
+	Description          sql.NullString
+	NeighborhoodOverview sql.NullString
 	PictureURL           string
-	Price                float32
-	Bedrooms             int
-	Beds                 int
+	Price                sql.NullFloat64
+	Bedrooms             sql.NullInt64
+	Beds                 sql.NullInt64
 	RoomType             string
 	PropertyType         string
-	Neighborhood         string
+	Neighborhood         sql.NullString
 	HostID               int64
 }
 
@@ -51,7 +51,7 @@ type TopKPayload struct {
 }
 
 type RoomsPayload struct {
-	Rooms []*Room `json:"rooms"`
+	Rooms []*RoomPayload `json:"rooms"`
 }
 
 func (r *RoomStore) Create(ctx context.Context, room *Room) error {
@@ -78,7 +78,7 @@ func (r *RoomStore) Create(ctx context.Context, room *Room) error {
 	return err
 }
 
-func (r *RoomStore) GetTopKRandom(ctx context.Context, k int) ([]*Room, error) {
+func (r *RoomStore) GetTopKRandom(ctx context.Context, k int) ([]*RoomPayload, error) {
 	query := `SELECT * from ROOMS ORDER BY RANDOM() LIMIT $1`
 
 	rows, err := r.db.QueryContext(ctx, query, k)
@@ -87,7 +87,7 @@ func (r *RoomStore) GetTopKRandom(ctx context.Context, k int) ([]*Room, error) {
 	}
 	defer rows.Close()
 
-	rooms := []*Room{}
+	rooms := []*RoomPayload{}
 	for rows.Next() {
 		room := &Room{}
 		err := rows.Scan(
@@ -109,12 +109,13 @@ func (r *RoomStore) GetTopKRandom(ctx context.Context, k int) ([]*Room, error) {
 			return nil, err
 		}
 
-		rooms = append(rooms, room)
+		roomPayload := CreateRoomPayloadFromRoomResponse(room)
+		rooms = append(rooms, roomPayload)
 	}
 	return rooms, nil
 }
 
-func (r *RoomStore) NextTopKRandom(ctx context.Context, k int, ids []int64) ([]*Room, error) {
+func (r *RoomStore) NextTopKRandom(ctx context.Context, k int, ids []int64) ([]*RoomPayload, error) {
 	// Create placeholder for the query
 	placeholder := make([]string, len(ids))
 	for i := range ids {
@@ -136,7 +137,7 @@ func (r *RoomStore) NextTopKRandom(ctx context.Context, k int, ids []int64) ([]*
 	}
 	defer rows.Close()
 
-	rooms := []*Room{}
+	rooms := []*RoomPayload{}
 	for rows.Next() {
 		room := &Room{}
 		err := rows.Scan(
@@ -157,8 +158,8 @@ func (r *RoomStore) NextTopKRandom(ctx context.Context, k int, ids []int64) ([]*
 		if err != nil {
 			return nil, err
 		}
-
-		rooms = append(rooms, room)
+		roomPayload := CreateRoomPayloadFromRoomResponse(room)
+		rooms = append(rooms, roomPayload)
 	}
 	return rooms, nil
 }

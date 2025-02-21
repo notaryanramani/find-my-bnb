@@ -202,3 +202,8 @@ cython_debug/
 # Custom Files
 bin/
 tmp/
+persist/
+
+# Tailwind File
+package-lock.json
+node_modules/

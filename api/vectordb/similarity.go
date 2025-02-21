@@ -11,11 +11,11 @@ type Similarity struct {
 }
 
 func (v *VectorDB) SimilaritySearch(text string) []*Node {
-	vector := getEmbeddings(text)
-	similarities := make([]Similarity, len(v.nodes))
+	vector := v.Embedder.getEmbeddings(text)
+	similarities := make([]Similarity, len(v.Nodes))
 
 	var wg sync.WaitGroup
-	for i, node := range v.nodes {
+	for i, node := range v.Nodes {
 		wg.Add(1)
 		go func(i int, node *Node) {
 			defer wg.Done()
@@ -32,9 +32,9 @@ func (v *VectorDB) SimilaritySearch(text string) []*Node {
 		return similarities[i].similarity > similarities[j].similarity
 	})
 
-	nodes := make([]*Node, len(v.nodes))
+	nodes := make([]*Node, len(v.Nodes))
 	for i, similarity := range similarities {
-		nodes[i] = v.nodes[similarity.nodeId]
+		nodes[i] = v.Nodes[similarity.nodeId]
 	}
 	return nodes
 }
