@@ -1,5 +1,8 @@
 package store
 
+import (
+	"fmt"
+)
 // type RoomPayload struct {
 // 	ID                   int64   `json:"id"`
 // 	ListingURL           string  `json:"listing_url"`
@@ -21,46 +24,49 @@ func CreateRoomPayloadFromRoomResponse(room *Room) *RoomPayload {
 	if room.Description.Valid {
 		description = room.Description.String
 	} else {
-		description = ""
+		description = "N/A"
 	}
 
 	var neighborhoodOverview string
 	if room.NeighborhoodOverview.Valid {
 		neighborhoodOverview = room.NeighborhoodOverview.String
 	} else {
-		neighborhoodOverview = ""
+		neighborhoodOverview = "N/A"
 	}
 
 	var price float32
 	if room.Price.Valid {
 		price = float32(room.Price.Float64)
 	} else {
-		price = 0
+		price = -1
 	}
 
 	var bedrooms int
 	if room.Bedrooms.Valid {
 		bedrooms = int(room.Bedrooms.Int64)
 	} else {
-		bedrooms = 0
+		bedrooms = -1
 	}
 
 	var beds int
 	if room.Beds.Valid {
 		beds = int(room.Beds.Int64)
 	} else {
-		beds = 0
+		beds = -1
 	}
 
 	var neighborhood string
-	if room.Neighborhood.Valid {
+	if room.Neighborhood.Valid{
 		neighborhood = room.Neighborhood.String
 	} else {
-		neighborhood = ""
+		neighborhood = "N/A"
 	}
+
+	IDString := fmt.Sprintf("%d", room.ID)
 
 	return &RoomPayload{
 		ID:                   room.ID,
+		IDString:             IDString,
 		ListingURL:           room.ListingURL,
 		Name:                 room.Name,
 		Description:          description,

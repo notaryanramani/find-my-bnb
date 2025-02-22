@@ -31,6 +31,7 @@ type Room struct {
 
 type RoomPayload struct {
 	ID                   int64   `json:"id"`
+	IDString             string  `json:"id_string"`
 	ListingURL           string  `json:"listing_url"`
 	Name                 string  `json:"name"`
 	Description          string  `json:"description"`
@@ -164,7 +165,7 @@ func (r *RoomStore) NextTopKRandom(ctx context.Context, k int, ids []int64) ([]*
 	return rooms, nil
 }
 
-func (r *RoomStore) GetByID(ctx context.Context, id int64) (*Room, error) {
+func (r *RoomStore) GetByID(ctx context.Context, id int64) (*RoomPayload, error) {
 	query := `SELECT * FROM rooms WHERE id = $1`
 
 	room := &Room{}
@@ -187,7 +188,9 @@ func (r *RoomStore) GetByID(ctx context.Context, id int64) (*Room, error) {
 		return nil, err
 	}
 
-	return room, nil
+	roomPayload := CreateRoomPayloadFromRoomResponse(room)
+
+	return roomPayload, nil
 }
 
 func (r *RoomStore) Delete(ctx context.Context, id int64) error {

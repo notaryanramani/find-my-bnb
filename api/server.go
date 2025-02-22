@@ -43,6 +43,7 @@ func (s *Server) Run() {
 	// Get Routes
 	s.router.Get("/hello", HelloWord)
 	s.router.Get("/check", Check)
+	s.router.Get("/rooms/{id}", s.getRoomByIdHandler)
 
 	// Post User Routes
 	s.router.Post("/register", s.createUserHandler)
@@ -51,6 +52,7 @@ func (s *Server) Run() {
 	// Post Room Routes
 	s.router.Post("/test-rooms", s.getRandomRoomsHandler)
 	s.router.Post("/rooms", AuthMiddleware(s.getRandomRoomsHandler))
+	
 
 	// Protected Routes
 	s.router.Get("/protected", AuthMiddleware(s.protectedHandler))

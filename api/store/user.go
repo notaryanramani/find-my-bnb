@@ -33,13 +33,13 @@ type UserLogin struct {
 }
 
 type UserPayload struct {
-	ID       int    `json:"id"`
 	Username string `json:"username"`
+	Message  string `json:"message"`
 }
 
 type UserLoginPayload struct {
 	Username string `json:"username"`
-	Token	string `json:"token"`
+	Token    string `json:"token"`
 }
 
 func (u *UserStore) Create(ctx context.Context, user *User) error {
@@ -95,4 +95,3 @@ func (u *UserStore) Delete(ctx context.Context, id int) error {
 
 	return err
 }
-
