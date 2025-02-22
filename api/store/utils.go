@@ -3,21 +3,6 @@ package store
 import (
 	"fmt"
 )
-// type RoomPayload struct {
-// 	ID                   int64   `json:"id"`
-// 	ListingURL           string  `json:"listing_url"`
-// 	Name                 string  `json:"name"`
-// 	Description          string  `json:"description"`
-// 	NeighborhoodOverview string  `json:"neighborhood_overview"`
-// 	PictureURL           string  `json:"picture_url"`
-// 	Price                float32 `json:"price"`
-// 	Bedrooms             int     `json:"bedrooms"`
-// 	Beds                 int     `json:"beds"`
-// 	RoomType             string  `json:"room_type"`
-// 	PropertyType         string  `json:"property_type"`
-// 	Neighborhood         string  `json:"neighborhood"`
-// 	HostID               int64   `json:"host_id"`
-// }
 
 func CreateRoomPayloadFromRoomResponse(room *Room) *RoomPayload {
 	var description string
@@ -56,7 +41,7 @@ func CreateRoomPayloadFromRoomResponse(room *Room) *RoomPayload {
 	}
 
 	var neighborhood string
-	if room.Neighborhood.Valid{
+	if room.Neighborhood.Valid {
 		neighborhood = room.Neighborhood.String
 	} else {
 		neighborhood = "N/A"

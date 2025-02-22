@@ -1,16 +1,34 @@
 <!doctype html>
 <html>
 <head>
+  <title>Find My Bnb</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="./css/output.css" rel="stylesheet">
   <script type="module" src="js/home.js" defer></script>
 </head>
 <body class="font-mono">
+    <nav class="gap-4 p-4">
+      <div class="flex justify-between items-center">
+        <div class="flex gap-4">
+          <a href="/about" class="text-blue-500">About</a>
+          <a href="/search" class="text-blue-500">Search</a>
+        </div>
+        <h1 class="text-2xl font-bold">Find My Bnb</h1>
+        <div class="flex gap-4">
+          <a href="/login" class="text-blue-500">Login</a>
+          <a href="/register" class="text-blue-500">Register</a>
+        </div>
+    </nav>
+    <div class="p-4 text-center flex flex-col">
+      <div>Keep scrolling to find your next bnb</div>
+      <div>Click on name for more info on the room</div>
+    </div>
+
+
     <div class="flex justify-center items-center" >
         <div class="flex gap-3 flex-col items-center justify-start h-full" id="page-content">
         </div>
     </div>
-
 </body>
 </html>

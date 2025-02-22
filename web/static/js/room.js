@@ -1,13 +1,18 @@
-const container_class = 'flex w-full p-4 justify-center items-center gap-4';
-const img_container_class = 'w-1/2 overflow-hidde flex justify-center items-center';
-const img_class = 'size-150 object-center rounded-lg';
-const details_container_class = 'w-1/2 p-2 flex flex-col gap-2';
-const name_class = 'text-xl font-bold text-gray-800';
-const detail_component_class = 'flex gap-2';
-const details_heading_component = 'text-l font-semibold text-gray-800 w-1/3';
-const details_value_component = 'text-sm text-gray-800 w-2/3';
+const classContainer = 'flex w-full p-4 justify-center items-center gap-4';
+const classImgContainer = 'w-1/2 overflow-hidde flex justify-center items-center';
+const classImg = 'size-125 object-center rounded-lg';
+const classDetailsContainer = 'w-1/2 p-2 flex flex-col gap-2';
+const className = 'text-xl font-bold text-gray-800';
+const classDetailComponent = 'flex gap-2';
+const classDetailsHeadingComponent = 'text-l font-semibold text-gray-800 w-1/3';
+const classDetailsValueComponent = 'text-sm text-gray-800 w-2/3';
 
-function fetchRoom(roomId) {
+const numericFields = ['price', 'bedrooms', 'beds'];
+const textFields = ['description', 'neighborhood_overview', 'room_type', 'property_type', 'neighborhood', 'host_id'];
+
+const fieldsToInclude = ['description', 'neighborhood_overview', 'price', 'bedrooms', 'beds', 'room_type', 'property_type', 'neighborhood', 'host_id'];
+
+function getRoom(roomId) {
     fetch(`http://localhost:8080/api/rooms/${roomId}`)
     .then(response => response.json())
     .then(data => {
@@ -21,60 +26,50 @@ function createRoomCard(data) {
 
     // main container
     var container = document.createElement('div');
-    container.classList.add(...container_class.split(' '));
+    container.classList.add(...classContainer.split(' '));
     
     // image container
-    var img_container = document.createElement('div');
-    img_container.classList.add(...img_container_class.split(' '));
+    var imgContainer = document.createElement('div');
+    imgContainer.classList.add(...classImgContainer.split(' '));
+
     var img = document.createElement('img');
     img.src = data['picture_url'];
     img.alt = 'Room Image';
-    img.classList.add(...img_class.split(' '));
-    img_container.appendChild(img);
+    img.classList.add(...classImg.split(' '));
+
+    imgContainer.appendChild(img);
+
     
 
     // details container
-    var details_container = document.createElement('div');
-    details_container.classList.add(...details_container_class.split(' '));
+    var detailsContainer = document.createElement('div');
+    detailsContainer.classList.add(...classDetailsContainer.split(' '));
     
     var name = document.createElement('div');
-    name.classList.add(...name_class.split(' '));
+    name.classList.add(...className.split(' '));
     name.innerText = data['name'];
-    details_container.appendChild(name);  
+    detailsContainer.appendChild(name);  
 
-    var description_container = createComponentContainer('Description', data['description']);
-    details_container.appendChild(description_container);
 
-    var neigh_overview_container = createComponentContainer('Neighbourhood', data['neighborhood_overview']);
-    details_container.appendChild(neigh_overview_container);
+    // details container loop
+    fieldsToInclude.forEach(field => {
+        var value = data[field];
+        if(numericFields.includes(field)) {
+            value = value != -1 ? value : 'Not Available';
+            if (field == 'price') {
+                value = '$' + value;
+            }
+        } else if(textFields.includes(field)) {
+            value = value != 'N/A' ? value : 'Not Available';
+        }
 
-    var price = data['price'] != -1 ? '$' + data['price'] : 'Not Available';
-    var price_container = createComponentContainer('Price',  price);
-    details_container.appendChild(price_container);
-
-    var bedrooms = data['bedrooms'] != -1 ? data['bedrooms'] : 'Not Available';
-    var bedrooms_container = createComponentContainer('Bedrooms', bedrooms);
-    details_container.appendChild(bedrooms_container);
-
-    var beds = data['beds'] != -1 ? data['beds'] : 'Not Available';
-    var beds_container = createComponentContainer('Beds', beds);
-    details_container.appendChild(beds_container);
-
-    var roomType_container = createComponentContainer('Room Type', data['room_type']);
-    details_container.appendChild(roomType_container);
-
-    var propertyType_container = createComponentContainer('Property Type', data['property_type']);
-    details_container.appendChild(propertyType_container);
-
-    var neighborhood_container = createComponentContainer('Neighbourhood', data['neighborhood']);
-    details_container.appendChild(neighborhood_container);
-
-    var host_container = createComponentContainer('Host ID: ', data['host_id']);
-    details_container.appendChild(host_container);
+        var detailContainer = createComponentContainer(field, value);
+        detailsContainer.appendChild(detailContainer);
+    });
 
     // append all the elements
-    container.appendChild(img_container);
-    container.appendChild(details_container);
+    container.appendChild(imgContainer);
+    container.appendChild(detailsContainer);
 
     // append the container to the main div
     maindiv.appendChild(container);
@@ -82,21 +77,21 @@ function createRoomCard(data) {
 
 function createComponentContainer(headingValue, valueValue) {
 
-    var component_container = document.createElement('div');
-    component_container.classList.add(...detail_component_class.split(' '));
+    var componentContainer = document.createElement('div');
+    componentContainer.classList.add(...classDetailComponent.split(' '));
 
     var heading = document.createElement('div');
-    heading.classList.add(...details_heading_component.split(' '));
+    heading.classList.add(...classDetailsHeadingComponent.split(' '));
     heading.innerText = headingValue;
 
     var value = document.createElement('div');
-    value.classList.add(...details_value_component.split(' '));
+    value.classList.add(...classDetailsValueComponent.split(' '));
     value.innerText = valueValue;
 
-    component_container.appendChild(heading);
-    component_container.appendChild(value);
+    componentContainer.appendChild(heading);
+    componentContainer.appendChild(value);
 
-    return component_container;
+    return componentContainer;
 }
 
 
@@ -104,5 +99,5 @@ document.addEventListener('DOMContentLoaded', function() {
     const urlParams = new URLSearchParams(window.location.search);
     const roomId = urlParams.get('id');
     
-    fetchRoom(roomId);
+    getRoom(roomId);
 });
