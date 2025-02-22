@@ -199,11 +199,7 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 
-# Custom Files
-bin/
-tmp/
-persist/
-.DS_Store
+
 
 # Node JS
 
@@ -343,3 +339,10 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# Custom Files
+bin/
+tmp/
+persist/
+.DS_Store
+output.css
