@@ -1,0 +1,70 @@
+<!doctype html>
+<html>
+<head>
+  <title>Find My Bnb</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="./css/output.css" rel="stylesheet">
+  <script type="module" src="js/register.js" defer></script>
+</head>
+<body class="font-mono max-h-full">
+    <nav class="gap-4 p-4">
+      <div class="flex justify-between items-center">
+        <div class="flex gap-4">
+          <a href="/about" class="text-blue-500">About</a>
+          <a href="/search" class="text-blue-500">Search</a>
+        </div>
+        <h1 class="text-2xl font-bold">Find My Bnb</h1>
+        <div class="flex gap-4">
+          <a href="/login" class="text-blue-500">Login</a>
+          <a href="/register" class="text-blue-500">Register</a>
+        </div>
+    </nav>
+
+
+    <div class="flex justify-center items-center p-4 w-full h-full">
+        <div class="w-[40%] h-full border-2 border-slate-900 bg-gray-50 p-4 rounded-md">
+            <div class="text-center text-l font-bold">Regsiter</div>
+            <div class="flex gap-3 flex-col items-center justify-start h-full mt-5">
+                <form class="space-y-6 w-4/5" id="registerForm">
+                    <div class="text-center w-full h-full mt-2">
+                        <label for="name" class="block w-full h-full text-sm font-medium">Name</label>
+                        <div class="mt-1 w-full h-full">
+                            <input type="text" name="name" id="name" class="text-center w-full h-6 shadow-sm sm:text-sm focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-md">
+                        </div>
+                    <div class="text-center w-full h-full mt-2">
+                        <label for="useranme" class="block w-full h-full text-sm font-medium">Username</label>
+                        <div class="mt-1 w-full h-full">
+                            <input type="text" name="username" id="username" class="text-center w-full h-6 shadow-sm sm:text-sm focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-md">
+                        </div>
+                    </div>
+                    <div class="text-center w-full h-full mt-2">
+                        <label for="email" class="block w-full h-full text-sm font-medium">Email</label>
+                        <div class="mt-1 w-full h-full">
+                            <input type="email" name="email" id="email" class="text-center w-full h-6 shadow-sm sm:text-sm focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-md">
+                        </div>
+                    </div>
+                    <div class="text-center w-full h-full mt-2">
+                        <label for="password" class="block text-sm font-medium">Password</label>
+                        <div class="mt-1">
+                            <input type="password" name="password" id="password" class="text-center w-full h-6  shadow-sm sm:text-sm focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-md">
+                        </div>
+                    </div>
+                    <div class="text-center w-full h-full mt-2">
+                        <label for="confirmPassword" class="block text-sm font-medium">ConfirmPassword</label>
+                        <div class="mt-1">
+                            <input type="password" name="confirmPassword" id="confirmPassword" class="text-center w-full h-6  shadow-sm sm:text-sm focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-md">
+                        </div>
+                    </div>
+                    <div class="text-center w-full h-full mt-5">
+                        <button type="submit" class="w-full h-8 bg-sky-500 text-white rounded-md hover:bg-blue-500 hover:cursor-pointer">Register</button>
+                    </div>
+                </form>
+                <div class="text-center w-full" style="display: none;" id="registerError">
+                    <div class="text-red-500" id="registerErrorDisplay"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

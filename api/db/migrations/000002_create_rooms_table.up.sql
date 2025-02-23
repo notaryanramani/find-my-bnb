@@ -10,5 +10,5 @@ CREATE TABLE IF NOT EXISTS rooms (
     beds INT,
     room_type VARCHAR(50) NOT NULL,
     property_type VARCHAR(50) NOT NULL,
-    neighbourhood VARCHAR(100),
+    neighbourhood VARCHAR(100)
 );

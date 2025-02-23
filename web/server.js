@@ -14,7 +14,15 @@ app.get('/home', (req, res) => {
 
 app.get('/rooms', (req, res) =>{
     res.sendFile(path.join(__dirname, 'static', 'room.html'));
-})
+});
+
+app.get('/login', (req, res) =>{
+    res.sendFile(path.join(__dirname, 'static', 'login.html'));
+});
+
+app.get('/register', (req, res) =>{
+    res.sendFile(path.join(__dirname, 'static', 'register.html'));
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

@@ -2,9 +2,9 @@ package main
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/notaryanramani/find-my-bnb/api/store"
@@ -12,15 +12,18 @@ import (
 )
 
 func HelloWord(w http.ResponseWriter, r *http.Request) {
+	log.Printf("Received %s request at %s", r.Method, r.URL.Path)
 	w.Write([]byte("Hello, World!"))
 }
 
 func Check(w http.ResponseWriter, r *http.Request) {
+	log.Printf("Received %s request at %s", r.Method, r.URL.Path)
 	w.Write([]byte("healthy"))
 }
 
 func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("Authenticating for %s", r.URL.Path)
 		token, err := r.Cookie("jwt-token")
 		if err != nil {
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
@@ -38,6 +41,8 @@ func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 }
 
 func (s *Server) createUserHandler(w http.ResponseWriter, r *http.Request) {
+	log.Printf("Received %s request at %s", r.Method, r.URL.Path)
+
 	var userJSON store.UserJSON
 
 	err := json.NewDecoder(r.Body).Decode(&userJSON)
@@ -48,7 +53,7 @@ func (s *Server) createUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	ok := utils.ValidatePassword(userJSON.Password)
 	if !ok {
-		http.Error(w, "Password must be at least 8 characters long", http.StatusBadRequest)
+		http.Error(w, "Password must be at least 8 characters long, contains special and uppercase character", http.StatusBadRequest)
 		return
 	}
 
@@ -67,6 +72,14 @@ func (s *Server) createUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	err = s.store.User.Create(r.Context(), user)
 	if err != nil {
+		if err.Error() == "pq: duplicate key value violates unique constraint \"users_username_key\"" {
+			http.Error(w, "Username already exists", http.StatusBadRequest)
+			return
+		}
+		if err.Error() == "pq: duplicate key value violates unique constraint \"users_email_key\"" {
+			http.Error(w, "Email already exists", http.StatusBadRequest)
+			return
+		}
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -82,6 +95,8 @@ func (s *Server) createUserHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) userLoginHandler(w http.ResponseWriter, r *http.Request) {
+	log.Printf("Received %s request at %s", r.Method, r.URL.Path)
+
 	var userLogin store.UserLogin
 	err := json.NewDecoder(r.Body).Decode(&userLogin)
 	if err != nil {
@@ -90,8 +105,8 @@ func (s *Server) userLoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user, err := s.store.User.GetByUsername(r.Context(), userLogin.Username)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	if err != nil && err.Error() == "sql: no rows in result set" {
+		http.Error(w, "No account found with username: "+userLogin.Username, http.StatusInternalServerError)
 		return
 	}
 
@@ -111,10 +126,7 @@ func (s *Server) userLoginHandler(w http.ResponseWriter, r *http.Request) {
 		Name:     "jwt-token",
 		Value:    token,
 		Path:     "/",
-		Expires:  time.Now().Add(24 * time.Hour),
 		MaxAge:   86400,
-		HttpOnly: true,
-		SameSite: http.SameSiteLaxMode,
 	})
 
 	w.Header().Set("Content-Type", "application/json")
