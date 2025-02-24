@@ -10,7 +10,7 @@ type Similarity struct {
 	similarity float64
 }
 
-func (v *VectorDB) SimilaritySearch(text string) []*Node {
+func (v *VectorDB) SimilaritySearch(text string, topK int) []*Node {
 	vector := v.Embedder.getEmbeddings(text)
 	similarities := make([]Similarity, len(v.Nodes))
 
@@ -32,9 +32,9 @@ func (v *VectorDB) SimilaritySearch(text string) []*Node {
 		return similarities[i].similarity > similarities[j].similarity
 	})
 
-	nodes := make([]*Node, len(v.Nodes))
-	for i, similarity := range similarities {
-		nodes[i] = v.Nodes[similarity.nodeId]
+	nodes := make([]*Node, topK)
+	for i := 0; i < topK; i++ {
+		nodes[i] = v.Nodes[similarities[i].nodeId]
 	}
 	return nodes
 }

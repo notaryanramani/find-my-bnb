@@ -22,6 +22,11 @@ type VectorDB struct {
 	Embedder *Embedder
 }
 
+type VectorSearchRequest struct {
+	Text string `json:"text"`
+	K int    `json:"k"`
+}
+
 func NewVectorDB() *VectorDB {
 	err := godotenv.Load()
 	if err != nil {

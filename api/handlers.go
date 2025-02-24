@@ -9,6 +9,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/notaryanramani/find-my-bnb/api/store"
 	"github.com/notaryanramani/find-my-bnb/api/utils"
+	"github.com/notaryanramani/find-my-bnb/api/vectordb"
 )
 
 func HelloWord(w http.ResponseWriter, r *http.Request) {
@@ -19,6 +20,10 @@ func HelloWord(w http.ResponseWriter, r *http.Request) {
 func Check(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Received %s request at %s", r.Method, r.URL.Path)
 	w.Write([]byte("healthy"))
+}
+
+func (s *Server) protectedHandler(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Protected."))
 }
 
 func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
@@ -187,6 +192,34 @@ func (s *Server) getRoomByIdHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(room)
 }
 
-func (s *Server) protectedHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Protected."))
+func (s *Server) vectorSearchHandler(w http.ResponseWriter, r *http.Request) {
+	var vsr vectordb.VectorSearchRequest
+	err := json.NewDecoder(r.Body).Decode(&vsr)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	nodes := s.vectordb.SimilaritySearch(vsr.Text, vsr.K)
+	ids := make([]int64, len(nodes))
+	for i, node := range nodes {
+		ids[i] = node.ID
+	}
+
+	rooms, err := s.store.Room.GetByMultipleIDs(r.Context(), ids)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	roomsPayload := &store.RoomsPayload{
+		Rooms: rooms,
+	}
+
+	json.NewEncoder(w).Encode(roomsPayload)
 }
+
+

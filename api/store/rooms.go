@@ -193,6 +193,55 @@ func (r *RoomStore) GetByID(ctx context.Context, id int64) (*RoomPayload, error)
 	return roomPayload, nil
 }
 
+func (r *RoomStore) GetByMultipleIDs(ctx context.Context, ids []int64) ([]*RoomPayload, error) {
+	// Create placeholder for the query
+	placeholder := make([]string, len(ids))
+	for i := range ids {
+		placeholder[i] = "$" + strconv.Itoa(i+1)
+	}
+
+	query := `SELECT * FROM rooms WHERE id IN (` + strings.Join(placeholder, ",") + `)`
+
+	// Create interface for IDS value
+	args := make([]interface{}, len(ids))
+	for i, id := range ids {
+		args[i] = id
+	}
+
+	rows, err := r.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	rooms := []*RoomPayload{}
+	for rows.Next() {
+		room := &Room{}
+		err := rows.Scan(
+			&room.ID,
+			&room.ListingURL,
+			&room.Name,
+			&room.Description,
+			&room.NeighborhoodOverview,
+			&room.PictureURL,
+			&room.Price,
+			&room.Bedrooms,
+			&room.Beds,
+			&room.RoomType,
+			&room.PropertyType,
+			&room.Neighborhood,
+			&room.HostID,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		roomPayload := CreateRoomPayloadFromRoomResponse(room)
+		rooms = append(rooms, roomPayload)
+	}
+	return rooms, nil
+}
+
 func (r *RoomStore) Delete(ctx context.Context, id int64) error {
 	query := `DELETE FROM rooms WHERE id = $1`
 
