@@ -28,7 +28,11 @@ func TestDBSimilaritySearch(t *testing.T) {
 	db.AddNode(1, "test", v1)
 	db.AddNode(2, "test2", v2)
 	text := "test3"
-	nodes := db.SimilaritySearch(text, 2)
+	req := VectorSearchRequest{
+		Text: text,
+		K:    2,
+	}
+	nodes, _ := db.SimilaritySearch(req)
 	if len(nodes) != 2 {
 		t.Errorf("Similarity search failed, expected 2, got %d\n", len(nodes))
 	}

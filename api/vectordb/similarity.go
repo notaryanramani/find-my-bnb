@@ -1,8 +1,12 @@
 package vectordb
 
 import (
+	"errors"
 	"sort"
 	"sync"
+	"time"
+
+	"github.com/google/uuid"
 )
 
 type Similarity struct {
@@ -10,8 +14,8 @@ type Similarity struct {
 	similarity float64
 }
 
-func (v *VectorDB) SimilaritySearch(text string, topK int) []*Node {
-	vector := v.Embedder.getEmbeddings(text)
+func (v *VectorDB) SimilaritySearch(req VectorSearchRequest) ([]*Node, string) {
+	vector := v.Embedder.getEmbeddings(req.Text)
 	similarities := make([]Similarity, len(v.Nodes))
 
 	var wg sync.WaitGroup
@@ -32,9 +36,37 @@ func (v *VectorDB) SimilaritySearch(text string, topK int) []*Node {
 		return similarities[i].similarity > similarities[j].similarity
 	})
 
-	nodes := make([]*Node, topK)
-	for i := 0; i < topK; i++ {
+	queryId := uuid.New().String()
+
+	v.Mu.Lock()
+	v.ResultCache[queryId] = similarities
+	v.Mu.Unlock()
+
+	time.AfterFunc(time.Minute*10, func() {
+		v.Mu.Lock()
+		delete(v.ResultCache, queryId)
+		v.Mu.Unlock()
+	})
+
+	nodes := make([]*Node, req.K)
+	for i := range req.K {
 		nodes[i] = v.Nodes[similarities[i].nodeId]
 	}
-	return nodes
+
+	return nodes, queryId
+}
+
+func (v *VectorDB) GetNodesFromCache(req VectorSearchRequest) ([]*Node, error) {
+	v.Mu.RLock()
+	cache, ok := v.ResultCache[req.QueryID]
+	if !ok {
+		return nil, errors.New("query id does not exist")
+	}
+
+	nodes := make([]*Node, req.K)
+
+	for i := range req.K {
+		nodes[i] = v.Nodes[cache[i+req.Offset].nodeId]
+	}
+	return nodes, nil
 }

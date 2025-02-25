@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"sync"
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
@@ -20,11 +21,19 @@ type VectorDB struct {
 
 	// Embedder
 	Embedder *Embedder
+
+	// Result Cache
+	ResultCache map[string][]Similarity
+
+	// Mutex
+	Mu *sync.RWMutex
 }
 
 type VectorSearchRequest struct {
-	Text string `json:"text"`
-	K int    `json:"k"`
+	Text    string `json:"text"`
+	K       int    `json:"k"`
+	Offset  int    `json:"offset"`
+	QueryID string `json:"query_id"`
 }
 
 func NewVectorDB() *VectorDB {
@@ -44,9 +53,11 @@ func NewVectorDB() *VectorDB {
 	}
 
 	return &VectorDB{
-		Dim:      dim,
-		Nodes:    make([]*Node, 0),
-		Embedder: NewEmbedder(),
+		Dim:         dim,
+		Nodes:       make([]*Node, 0),
+		Embedder:    NewEmbedder(),
+		ResultCache: make(map[string][]Similarity),
+		Mu:          &sync.RWMutex{},
 	}
 }
 

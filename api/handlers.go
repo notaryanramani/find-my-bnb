@@ -200,7 +200,7 @@ func (s *Server) vectorSearchHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	nodes := s.vectordb.SimilaritySearch(vsr.Text, vsr.K)
+	nodes, query_id := s.vectordb.SimilaritySearch(vsr)
 	ids := make([]int64, len(nodes))
 	for i, node := range nodes {
 		ids[i] = node.ID
@@ -217,6 +217,7 @@ func (s *Server) vectorSearchHandler(w http.ResponseWriter, r *http.Request) {
 
 	roomsPayload := &store.RoomsPayload{
 		Rooms: rooms,
+		QueryID: query_id,
 	}
 
 	json.NewEncoder(w).Encode(roomsPayload)
