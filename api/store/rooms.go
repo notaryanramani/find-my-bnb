@@ -54,6 +54,7 @@ type TopKPayload struct {
 type RoomsPayload struct {
 	Rooms   []*RoomPayload `json:"rooms"`
 	QueryID string         `json:"query_id"`
+	Info    string         `json:"info"`
 }
 
 func (r *RoomStore) Create(ctx context.Context, room *Room) error {

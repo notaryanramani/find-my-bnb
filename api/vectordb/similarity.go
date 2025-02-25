@@ -1,7 +1,6 @@
 package vectordb
 
 import (
-	"errors"
 	"sort"
 	"sync"
 	"time"
@@ -56,17 +55,15 @@ func (v *VectorDB) SimilaritySearch(req VectorSearchRequest) ([]*Node, string) {
 	return nodes, queryId
 }
 
-func (v *VectorDB) GetNodesFromCache(req VectorSearchRequest) ([]*Node, error) {
+func (v *VectorDB) GetNodesFromCache(req VectorSearchRequest) []*Node {
 	v.Mu.RLock()
-	cache, ok := v.ResultCache[req.QueryID]
-	if !ok {
-		return nil, errors.New("query id does not exist")
-	}
+	defer v.Mu.RUnlock()
 
+	cache, _ := v.ResultCache[req.QueryID]
+	
 	nodes := make([]*Node, req.K)
-
 	for i := range req.K {
 		nodes[i] = v.Nodes[cache[i+req.Offset].nodeId]
 	}
-	return nodes, nil
+	return nodes
 }

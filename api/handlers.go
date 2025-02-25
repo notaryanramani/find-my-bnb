@@ -200,7 +200,20 @@ func (s *Server) vectorSearchHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	nodes, query_id := s.vectordb.SimilaritySearch(vsr)
+	var nodes []*vectordb.Node
+	var query_id string
+	var info string
+	if _, ok := s.vectordb.ResultCache[vsr.QueryID]; !ok || vsr.QueryID == "" {
+		nodes, query_id = s.vectordb.SimilaritySearch(vsr)
+		info = "query_id not provided, expired or invalid. New query_id generated."
+	} else {
+		nodes = s.vectordb.GetNodesFromCache(vsr)
+		query_id = vsr.QueryID
+		info = "query_id found in cache. Returning cached results."
+	}
+
+	
+
 	ids := make([]int64, len(nodes))
 	for i, node := range nodes {
 		ids[i] = node.ID
@@ -212,14 +225,14 @@ func (s *Server) vectorSearchHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-
 	roomsPayload := &store.RoomsPayload{
 		Rooms: rooms,
 		QueryID: query_id,
+		Info: info,
 	}
 
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(roomsPayload)
 }
 
