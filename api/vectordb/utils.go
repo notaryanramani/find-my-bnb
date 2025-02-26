@@ -56,3 +56,23 @@ func queryDB(db *sql.DB) *[]*DBNode {
 
 	return &DBNodes
 }
+
+func findNodeById(nodes []*Node, id int64) *Node {
+	l := 0
+	r := len(nodes) - 1
+
+	for l <= r {
+		m := l + (r-l)/2
+		if nodes[m].ID == id {
+			return nodes[m]
+		}
+
+		if nodes[m].ID < id {
+			l = m + 1
+		} else {
+			r = m - 1
+		}
+	}
+	return nil
+}
+

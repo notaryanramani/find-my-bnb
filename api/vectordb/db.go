@@ -5,6 +5,7 @@ import (
 	"encoding/gob"
 	"log"
 	"os"
+	"sort"
 	"strconv"
 	"sync"
 
@@ -73,7 +74,12 @@ func (v *VectorDB) InitVectorDB(db *sql.DB) {
 		v.AddNode(DBNode.ID, content, vector)
 	}
 
-	// 3. Persist the VectorDB
+	// 3. Sort Nodes on IDs for Binary Search
+	sort.Slice(v.Nodes, func(i, j int) bool {
+		return v.Nodes[i].ID < v.Nodes[j].ID
+	})
+
+	// 4. Persist the VectorDB
 	v.Persist()
 }
 
@@ -90,14 +96,14 @@ func (v *VectorDB) Persist() {
 	defer file.Close()
 
 	encoder := gob.NewEncoder(file)
-	err = encoder.Encode(v)
+	err = encoder.Encode(v.Nodes)
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
 func LoadVectorDB() *VectorDB {
-	var v VectorDB
+	var n []*Node
 	file, err := os.Open("persist/vectordb.gob")
 	if err != nil {
 		log.Fatal(err)
@@ -106,10 +112,18 @@ func LoadVectorDB() *VectorDB {
 	defer file.Close()
 
 	decoder := gob.NewDecoder(file)
-	err = decoder.Decode(&v)
+	err = decoder.Decode(&n)
 	if err != nil {
 		log.Fatal(err)
 		return nil
+	}
+
+	v := VectorDB{
+		Dim: len((n)[0].Vector),
+		Nodes: n,
+		Embedder: NewEmbedder(),
+		ResultCache: make(map[string][]Similarity),
+		Mu: &sync.RWMutex{},
 	}
 
 	return &v
@@ -125,5 +139,5 @@ func (v *VectorDB) Size() int {
 }
 
 func init() {
-	gob.Register(&VectorDB{})
+	gob.Register(&[]*Node{})
 }

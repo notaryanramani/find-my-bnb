@@ -128,10 +128,10 @@ func (s *Server) userLoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.SetCookie(w, &http.Cookie{
-		Name:     "jwt-token",
-		Value:    token,
-		Path:     "/",
-		MaxAge:   86400,
+		Name:   "jwt-token",
+		Value:  token,
+		Path:   "/",
+		MaxAge: 86400,
 	})
 
 	w.Header().Set("Content-Type", "application/json")
@@ -203,6 +203,7 @@ func (s *Server) vectorSearchHandler(w http.ResponseWriter, r *http.Request) {
 	var nodes []*vectordb.Node
 	var query_id string
 	var info string
+
 	if _, ok := s.vectordb.ResultCache[vsr.QueryID]; !ok || vsr.QueryID == "" {
 		nodes, query_id = s.vectordb.SimilaritySearch(vsr)
 		info = "query_id not provided, expired or invalid. New query_id generated."
@@ -211,8 +212,6 @@ func (s *Server) vectorSearchHandler(w http.ResponseWriter, r *http.Request) {
 		query_id = vsr.QueryID
 		info = "query_id found in cache. Returning cached results."
 	}
-
-	
 
 	ids := make([]int64, len(nodes))
 	for i, node := range nodes {
@@ -226,14 +225,12 @@ func (s *Server) vectorSearchHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	roomsPayload := &store.RoomsPayload{
-		Rooms: rooms,
+		Rooms:   rooms,
 		QueryID: query_id,
-		Info: info,
+		Info:    info,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(roomsPayload)
 }
-
-

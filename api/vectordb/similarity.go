@@ -9,8 +9,8 @@ import (
 )
 
 type Similarity struct {
-	nodeId     int64
-	similarity float64
+	NodeId     int64
+	Similarity float64
 }
 
 func (v *VectorDB) SimilaritySearch(req VectorSearchRequest) ([]*Node, string) {
@@ -23,8 +23,8 @@ func (v *VectorDB) SimilaritySearch(req VectorSearchRequest) ([]*Node, string) {
 		go func(i int, node *Node) {
 			defer wg.Done()
 			similarities[i] = Similarity{
-				nodeId:     node.ID,
-				similarity: node.Similarity(vector),
+				NodeId:     node.ID,
+				Similarity: node.Similarity(vector),
 			}
 		}(i, node)
 	}
@@ -32,7 +32,7 @@ func (v *VectorDB) SimilaritySearch(req VectorSearchRequest) ([]*Node, string) {
 
 	// Sort the similarities in descending order
 	sort.Slice(similarities, func(i, j int) bool {
-		return similarities[i].similarity > similarities[j].similarity
+		return similarities[i].Similarity > similarities[j].Similarity
 	})
 
 	queryId := uuid.New().String()
@@ -49,7 +49,7 @@ func (v *VectorDB) SimilaritySearch(req VectorSearchRequest) ([]*Node, string) {
 
 	nodes := make([]*Node, req.K)
 	for i := range req.K {
-		nodes[i] = v.Nodes[similarities[i].nodeId]
+		nodes[i] = findNodeById(v.Nodes, similarities[i].NodeId)
 	}
 
 	return nodes, queryId
@@ -59,11 +59,11 @@ func (v *VectorDB) GetNodesFromCache(req VectorSearchRequest) []*Node {
 	v.Mu.RLock()
 	defer v.Mu.RUnlock()
 
-	cache, _ := v.ResultCache[req.QueryID]
+	cache := v.ResultCache[req.QueryID]
 	
 	nodes := make([]*Node, req.K)
 	for i := range req.K {
-		nodes[i] = v.Nodes[cache[i+req.Offset].nodeId]
+		nodes[i] = findNodeById(v.Nodes, cache[i+req.Offset].NodeId)
 	}
 	return nodes
 }
