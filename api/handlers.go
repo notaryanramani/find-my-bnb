@@ -193,6 +193,8 @@ func (s *Server) getRoomByIdHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) vectorSearchHandler(w http.ResponseWriter, r *http.Request) {
+	log.Printf("Received %s request at %s", r.Method, r.URL.Path)
+
 	var vsr vectordb.VectorSearchRequest
 	err := json.NewDecoder(r.Body).Decode(&vsr)
 	if err != nil {

@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+<head>
+  <title>Find My Bnb</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="./css/output.css" rel="stylesheet">
+  <script type="module" src="js/search.js" defer></script>
+</head>
+<body class="font-mono">
+    <nav class="gap-4 p-4">
+      <div class="flex justify-between items-center">
+        <div class="flex gap-4">
+          <a href="/about" class="text-blue-500">About</a>
+          <a href="/search" class="text-blue-500">Search</a>
+        </div>
+        <h1 class="text-2xl font-bold">Find My Bnb</h1>
+        <div class="flex gap-4">
+          <a href="/login" class="text-blue-500">Login</a>
+          <a href="/register" class="text-blue-500">Register</a>
+        </div>
+    </nav>
+    <div class="p-4 text-center flex flex-col">
+      <form id="search-form" class="flex flex-col gap-4 w-1/2 mx-auto h-[50vh]">
+        <label for="search-input" class="text-lg">Search for your ideal BnB</label>
+        <textarea id="search-input" name="search" class="p-2 border border-gray-300 rounded-lg h-1/4" style="resize: none;" placeholder="Describe your ideal BnB"></textarea>
+        <button id="search-button" type="submit" class="p-2 bg-blue-500 text-white rounded-lg">Search</button>
+      </form>
+    </div>
+
+
+    <div class="flex justify-center items-center" >
+        <div class="flex gap-3 flex-col items-center justify-start h-full" id="page-content">
+        </div>
+    </div>
+</body>
+</html>

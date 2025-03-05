@@ -1,6 +1,7 @@
-import { createCard } from './card.js';
+import { createCard, renderFallback } from './card.js';
 
 var roomIds = [];
+let scrollTimeout;
 
 function fetchRooms(){
     const K = 10;
@@ -43,20 +44,18 @@ function fetchRooms(){
     });
 }
 
-function renderFallback(){
-    const parentDiv = document.getElementById('page-content');
-    const fallback = document.createElement('p');
-    fallback.innerText = 'Something went wrong. Please try again later. API is not available. :(';
-    parentDiv.appendChild(fallback);
-}
-
 document.addEventListener('DOMContentLoaded', function() {
     fetchRooms();
-    let count = 10;
-    document.addEventListener('scroll', function() {
-        if (count < 100 && window.scrollY + window.innerHeight >= document.documentElement.scrollHeight) {
-            fetchRooms();
-            count += 10;
-        }
-    });    
+
+    window.addEventListener('scroll', function() {
+        clearTimeout(scrollTimeout);
+        
+        scrollTimeout = setTimeout(function() {
+            document.addEventListener('scroll', function() {
+                if (window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 500) {
+                    fetchRooms();
+                }
+            });    
+        }, 200);
+    });
 });

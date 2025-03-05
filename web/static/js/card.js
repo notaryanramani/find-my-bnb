@@ -56,4 +56,11 @@ function createCard(data, K) {
     return roomIds;
 }
 
-export { createCard };
+function renderFallback(){
+    const parentDiv = document.getElementById('page-content');
+    const fallback = document.createElement('p');
+    fallback.innerText = 'Something went wrong. Please try again later. API is not available. :(';
+    parentDiv.appendChild(fallback);
+}
+
+export { createCard, renderFallback };

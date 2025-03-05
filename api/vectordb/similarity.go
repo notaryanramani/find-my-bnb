@@ -60,7 +60,7 @@ func (v *VectorDB) GetNodesFromCache(req VectorSearchRequest) []*Node {
 	defer v.Mu.RUnlock()
 
 	cache := v.ResultCache[req.QueryID]
-	
+
 	nodes := make([]*Node, req.K)
 	for i := range req.K {
 		nodes[i] = findNodeById(v.Nodes, cache[i+req.Offset].NodeId)

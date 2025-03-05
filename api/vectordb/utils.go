@@ -25,7 +25,7 @@ func MultiplyVectors(v1 []float64, v2 []float64) float64 {
 func AddElements(vector []float64) float64 {
 	sum := 0.0
 	for _, v := range vector {
-		sum += v
+		sum += v * v
 	}
 	return sum
 }
@@ -75,4 +75,3 @@ func findNodeById(nodes []*Node, id int64) *Node {
 	}
 	return nil
 }
-
