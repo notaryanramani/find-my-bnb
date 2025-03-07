@@ -4,7 +4,7 @@ let scrollTimeout;
 const k = 10;
 var offset = 0;
 var queryID = "";
-const URL = 'http://localhost:8080/api/vector-search';
+const URL = 'http//localhost:8080/api/vector-search';
 
 function vectorSearch(query, offset) {
     var body = {
@@ -14,7 +14,6 @@ function vectorSearch(query, offset) {
         'query_id' : queryID,
     }
 
-    console.log(queryID)
     fetch(URL, {
         method: 'POST',
         headers: {

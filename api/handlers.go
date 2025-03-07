@@ -12,26 +12,13 @@ import (
 	"github.com/notaryanramani/find-my-bnb/api/vectordb"
 )
 
-func HelloWord(w http.ResponseWriter, r *http.Request) {
-	log.Printf("Received %s request at %s", r.Method, r.URL.Path)
-	w.Write([]byte("Hello, World!"))
-}
-
-func Check(w http.ResponseWriter, r *http.Request) {
-	log.Printf("Received %s request at %s", r.Method, r.URL.Path)
-	w.Write([]byte("healthy"))
-}
-
-func (s *Server) protectedHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Protected."))
-}
-
+// AuthMiddleware is a middleware that authenticates the user by checking the jwt token
 func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Authenticating for %s", r.URL.Path)
 		token, err := r.Cookie("jwt-token")
 		if err != nil {
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			http.Error(w, "Unauthorized. No Cookie named \"jwt-token\"", http.StatusUnauthorized)
 			return
 		}
 
@@ -45,6 +32,7 @@ func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
+// createUserHandler creates a new user in the database
 func (s *Server) createUserHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Received %s request at %s", r.Method, r.URL.Path)
 
@@ -99,6 +87,7 @@ func (s *Server) createUserHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
+// userLoginHandler logs in the user by setting the jwt & username cookie
 func (s *Server) userLoginHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Received %s request at %s", r.Method, r.URL.Path)
 
@@ -128,6 +117,47 @@ func (s *Server) userLoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.SetCookie(w, &http.Cookie{
+		Name:     "jwt-token",
+		Value:    token,
+		Path:     "/",
+		MaxAge:   86400,
+		HttpOnly: false,
+		SameSite: http.SameSiteNoneMode,
+		Secure:   false,
+	})
+
+	http.SetCookie(w, &http.Cookie{
+		Name:  "username",
+		Value: user.Username,
+		Path:  "/",
+	})
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+}
+
+func (s *Server) autoLoginHandler(w http.ResponseWriter, r *http.Request) {
+	log.Printf("Received %s request at %s", r.Method, r.URL.Path)
+
+	username, err := r.Cookie("username")
+	if err != nil {
+		http.Error(w, "No username found", http.StatusBadRequest)
+		return
+	}
+
+	user, err := s.store.User.GetByUsername(r.Context(), username.Value)
+	if err != nil && err.Error() == "sql: no rows in result set" {
+		http.Error(w, "No account found with username: "+username.Value, http.StatusInternalServerError)
+		return
+	}
+
+	token, err := utils.GenerateToken(user)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	http.SetCookie(w, &http.Cookie{
 		Name:   "jwt-token",
 		Value:  token,
 		Path:   "/",
@@ -136,8 +166,31 @@ func (s *Server) userLoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Auto logged in successfully. Generated new token."))
 }
 
+// userLogoutHandler logs out the user by deleting the jwt & username cookie
+func (s *Server) userLogoutHandler(w http.ResponseWriter, r *http.Request) {
+	log.Printf("Received %s request at %s", r.Method, r.URL.Path)
+
+	http.SetCookie(w, &http.Cookie{
+		Name:   "jwt-token",
+		Value:  "",
+		Path:   "/",
+		MaxAge: -1,
+	})
+
+	http.SetCookie(w, &http.Cookie{
+		Name:  "username",
+		Value: "",
+	})
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Logged out successfully"))
+}
+
+// getRandomRoomsHandler handles the get random rooms request
 func (s *Server) getRandomRoomsHandler(w http.ResponseWriter, r *http.Request) {
 	var topK store.TopKPayload
 	var err error
@@ -172,6 +225,7 @@ func (s *Server) getRandomRoomsHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(roomsPayload)
 }
 
+// getRoomByIdHandler handles the get room by id request
 func (s *Server) getRoomByIdHandler(w http.ResponseWriter, r *http.Request) {
 	idString := chi.URLParam(r, "id")
 	id, err := strconv.Atoi(idString)
@@ -192,6 +246,7 @@ func (s *Server) getRoomByIdHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(room)
 }
 
+// vectorSearchHandler handles the vector search request
 func (s *Server) vectorSearchHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Received %s request at %s", r.Method, r.URL.Path)
 
@@ -235,4 +290,23 @@ func (s *Server) vectorSearchHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(roomsPayload)
+}
+
+/* Helper Handlers */
+
+// HelloWord is a simple handler that returns "Hello, World!"
+func HelloWord(w http.ResponseWriter, r *http.Request) {
+	log.Printf("Received %s request at %s", r.Method, r.URL.Path)
+	w.Write([]byte("Hello, World!"))
+}
+
+// Check is a simple handler that returns "healthy"
+func Check(w http.ResponseWriter, r *http.Request) {
+	log.Printf("Received %s request at %s", r.Method, r.URL.Path)
+	w.Write([]byte("healthy"))
+}
+
+// protectedHandler is a simple handler that returns "protected". Used for testing AuthMiddleware
+func (s *Server) protectedHandler(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("protected"))
 }

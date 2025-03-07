@@ -14,8 +14,6 @@ function createCard(data, K) {
         let room = rooms[i];
         roomIds.push(room['id']);
 
-        console.log(room);
-
         // Main Card
         const card = document.createElement('div');
         card.classList.add(...classCard.split(' '));
