@@ -1,3 +1,6 @@
+import { URL } from './utils.js';
+
+// TODO: Clean this
 const classContainer = 'flex w-full p-4 justify-center items-center gap-4';
 const classImgContainer = 'w-1/2 overflow-hidde flex justify-center items-center';
 const classImg = 'size-125 object-center rounded-lg';
@@ -13,7 +16,7 @@ const textFields = ['description', 'neighborhood_overview', 'room_type', 'proper
 const fieldsToInclude = ['description', 'neighborhood_overview', 'price', 'bedrooms', 'beds', 'room_type', 'property_type', 'neighborhood', 'host_id'];
 
 function getRoom(roomId) {
-    fetch(`http://localhost:8080/api/rooms/${roomId}`)
+    fetch(URL + `/rooms/${roomId}`)
     .then(response => response.json())
     .then(data => {
         console.log('Success:', data);
@@ -93,7 +96,6 @@ function createComponentContainer(headingValue, valueValue) {
 
     return componentContainer;
 }
-
 
 document.addEventListener('DOMContentLoaded', function() {
     const urlParams = new URLSearchParams(window.location.search);

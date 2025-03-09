@@ -1,10 +1,10 @@
 import { createCard, renderFallback } from "./card.js";
+import { URL } from "./utils.js";
 
 let scrollTimeout;
 const k = 10;
 var offset = 0;
 var queryID = "";
-const URL = 'http//localhost:8080/api/vector-search';
 
 function vectorSearch(query, offset) {
     var body = {
@@ -14,7 +14,7 @@ function vectorSearch(query, offset) {
         'query_id' : queryID,
     }
 
-    fetch(URL, {
+    fetch(URL + '/vector-search', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'

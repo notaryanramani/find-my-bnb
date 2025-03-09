@@ -1,5 +1,6 @@
 import { createCard, renderFallback } from './card.js';
 import { isLogged, logout } from './utils.js';
+import { URL } from './utils.js';
 
 var roomIds = [];
 let scrollTimeout;
@@ -20,7 +21,7 @@ function fetchRooms(){
         });
     }
 
-    fetch('http://localhost:8080/api/test-rooms', {
+    fetch(URL + '/test-rooms', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'

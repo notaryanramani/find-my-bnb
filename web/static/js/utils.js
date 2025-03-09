@@ -1,4 +1,4 @@
-const URL = 'http://localhost:8080/api';
+export const URL = 'http://localhost:8080/api';
 
 export function isLogged() {
     return fetch(URL + '/auto-login', {
@@ -26,9 +26,10 @@ export function isLogged() {
 
 export async function logout() {
     const response = await fetch(URL+'/logout', {
-        method: 'GET',
+        method: 'POST',
         headers: {
             'Content-Type': 'application/json'
-        }
+        },
+        credentials: 'include'
     })
 }
