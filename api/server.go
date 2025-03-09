@@ -48,6 +48,8 @@ func (s *Server) Run() {
 	// Post User Routes
 	s.router.Post("/register", s.createUserHandler)
 	s.router.Post("/login", s.userLoginHandler)
+	s.router.Post("/auto-login", AuthMiddleware(s.autoLoginHandler))
+	s.router.Post("/logout", AuthMiddleware(s.userLogoutHandler))
 
 	// Post Room Routes
 	s.router.Post("/test-rooms", s.getRandomRoomsHandler)

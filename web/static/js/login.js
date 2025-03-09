@@ -1,14 +1,29 @@
+import { URL } from './utils.js';
+
 document.getElementById('loginForm').addEventListener('submit', function(e) {
     e.preventDefault();
 
     var username = document.getElementById('username').value;
     var password = document.getElementById('password').value;
 
-    login(username, password)
+    login(username, password);
+});
+
+function login(username, password) {
+    fetch(URL + '/login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ 
+            "username" : username, 
+            "password" : password 
+        }),
+        credentials: 'include'
+    })
     .then(response => {
-        console.log(response);
         if (response.ok) {
-            window.location.href = '/home';
+           window.location.href = '/home';
         }
         else {
             var error = document.getElementById('loginError');
@@ -19,18 +34,4 @@ document.getElementById('loginForm').addEventListener('submit', function(e) {
             });
         }
     });
-});
-
-async function login(username, password) {
-    const response = await fetch('http://localhost:8080/api/login', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ 
-            "username" : username, 
-            "password" : password 
-        })
-    });
-    return response; 
 }

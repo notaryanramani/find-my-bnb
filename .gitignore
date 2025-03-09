@@ -346,3 +346,4 @@ tmp/
 persist/
 .DS_Store
 output.css
+certs/

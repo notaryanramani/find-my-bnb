@@ -1,3 +1,5 @@
+import { URL } from './utils.js';
+
 document.getElementById('registerForm').addEventListener('submit', function(e) {
     e.preventDefault();
 
@@ -22,7 +24,19 @@ document.getElementById('registerForm').addEventListener('submit', function(e) {
         password: password
     };
 
-    register(user)
+    register(user);
+});
+
+function register(user) {
+    fetch(URL + '/register', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            user
+        })
+    })
     .then(response => {
         console.log(response);
         if (response.ok) {
@@ -36,20 +50,5 @@ document.getElementById('registerForm').addEventListener('submit', function(e) {
                 errorDisply.innerHTML = text;
             });
         }
-    });
-});
-
-async function register(user) {
-    return await fetch('http://localhost:8080/api/register', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            name: user.name,
-            username: user.username,
-            email: user.email,
-            password: user.password
-        })
     });
 }
