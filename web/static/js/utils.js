@@ -1,7 +1,7 @@
-export const URL = 'http://localhost:8080/api';
+import { URL } from './constants.js';
 
-export function isLogged() {
-    return fetch(URL + '/auto-login', {
+async function checkLogin() {
+    return await fetch(URL + '/auto-login', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -23,9 +23,29 @@ export function isLogged() {
     });
 }
 
+export function updateNavBar() {
+    checkLogin().then(logged => {
+        if (logged) {
+            document.getElementById('login-a').style.display = 'none';
+    
+            let logout_var = document.getElementById('logout-a');
+            logout_var.style.display = 'block';
+            logout_var.addEventListener('click', logout);
+    
+            document.getElementById('register-a').style.display = 'none';   
+            document.getElementById('account-a').style.display = 'block';
+        } else {
+            document.getElementById('login-a').style.display = 'block';
+            document.getElementById('logout-a').style.display = 'none';
+            document.getElementById('register-a').style.display = 'block';
+            document.getElementById('account-a').style.display = 'none';
+        }
+    });
+}
+
 
 export async function logout() {
-    const response = await fetch(URL+'/logout', {
+    await fetch(URL+'/logout', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'

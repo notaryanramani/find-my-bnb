@@ -1,6 +1,6 @@
 import { createCard, renderFallback } from './card.js';
-import { isLogged, logout } from './utils.js';
-import { URL } from './utils.js';
+import { updateNavBar } from './utils.js';
+import { URL } from './constants.js';
 
 var roomIds = [];
 let scrollTimeout;
@@ -46,23 +46,7 @@ function fetchRooms(){
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    isLogged().then(logged => {
-        if (logged) {
-            document.getElementById('login-a').style.display = 'none';
-    
-            let logout_var = document.getElementById('logout-a');
-            logout_var.style.display = 'block';
-            logout_var.addEventListener('click', logout);
-    
-            document.getElementById('register-a').style.display = 'none';   
-            document.getElementById('account-a').style.display = 'block';
-        } else {
-            document.getElementById('login-a').style.display = 'block';
-            document.getElementById('logout-a').style.display = 'none';
-            document.getElementById('register-a').style.display = 'block';
-            document.getElementById('account-a').style.display = 'none';
-        }
-    });
+    updateNavBar();
     
     fetchRooms();
     window.addEventListener('scroll', function() {

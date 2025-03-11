@@ -1,4 +1,4 @@
-import { URL } from './utils.js';
+import { URL } from './constants.js';
 
 document.getElementById('loginForm').addEventListener('submit', function(e) {
     e.preventDefault();

@@ -1,5 +1,6 @@
 import { createCard, renderFallback } from "./card.js";
-import { URL } from "./utils.js";
+import { updateNavBar } from "./utils.js";
+import { URL } from "./constants.js";
 
 let scrollTimeout;
 const k = 10;
@@ -47,6 +48,7 @@ document.getElementById('search-form').addEventListener('submit', function(e) {
 });
 
 document.addEventListener('DOMContentLoaded', function() {
+    updateNavBar();
     document.addEventListener('scroll', function () {
         clearTimeout(scrollTimeout); 
 
