@@ -44,12 +44,16 @@ func (s *Server) Run() {
 	s.router.Get("/hello", HelloWord)
 	s.router.Get("/check", Check)
 	s.router.Get("/rooms/{id}", s.getRoomByIdHandler)
+	s.router.Get("/check-wishlist/{id}", AuthMiddleware(s.checkRoomExistsinWishlistHandler))
+	s.router.Get("/wishlist", AuthMiddleware(s.getWishlistHandler))
 
 	// Post User Routes
 	s.router.Post("/register", s.createUserHandler)
 	s.router.Post("/login", s.userLoginHandler)
 	s.router.Post("/auto-login", AuthMiddleware(s.autoLoginHandler))
 	s.router.Post("/logout", AuthMiddleware(s.userLogoutHandler))
+	s.router.Post("/add-to-wishlist", AuthMiddleware(s.addToWishlistHandler))
+	s.router.Post("/remove-from-wishlist", AuthMiddleware(s.removeFromWishlistHandler))
 
 	// Post Room Routes
 	s.router.Post("/test-rooms", s.getRandomRoomsHandler)

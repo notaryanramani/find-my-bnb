@@ -95,3 +95,40 @@ func (u *UserStore) Delete(ctx context.Context, id int) error {
 
 	return err
 }
+
+func (u *UserStore) AddRoomToWishlist(ctx context.Context, username string, roomID int64) error {
+	query := `UPDATE users SET wishlist = array_append(wishlist, $1) WHERE username = $2`
+
+	_, err := u.db.ExecContext(ctx, query, roomID, username)
+
+	return err
+}
+
+func (u *UserStore) RemoveRoomFromWishlist(ctx context.Context, username string, roomID int64) error {
+	query := `UPDATE users SET wishlist = array_remove(wishlist, $1) WHERE username = $2`
+
+	_, err := u.db.ExecContext(ctx, query, roomID, username)
+
+	return err
+}
+
+func (u *UserStore) GetWishlist(ctx context.Context, username string) ([]int64, error) {
+	query := `SELECT wishlist FROM users WHERE username = $1`
+
+	var wishlist []int64
+	err := u.db.QueryRowContext(ctx, query, username).Scan(&wishlist)
+	if err != nil {
+		return nil, err
+	}
+
+	return wishlist, nil
+}
+
+func (u *UserStore) CheckRoomExistInWishlist(ctx context.Context, username string, roomID int64) (bool, error) {
+	query := `SELECT EXISTS(SELECT 1 FROM users WHERE username = $1 AND $2 = ANY(wishlist));`
+
+	var exist bool
+	err := u.db.QueryRowContext(ctx, query, username, roomID).Scan(&exist)
+
+	return exist, err
+}

@@ -12,7 +12,7 @@ async function getRoom(roomId) {
     })
 }
 
-function createRoomCard(data) {
+async function createRoomCard(data) {
     var maindiv = document.getElementById('target-div');
 
     // main container
@@ -69,15 +69,25 @@ function createRoomCard(data) {
         var likeButton = document.getElementById('like-button');
         
         if (likeButton.classList.contains("fa-regular")){
-            likeButton.classList.remove("fa-regular");
-            likeButton.classList.add("fa-solid");
-
-            // Backend Logic 
+            addToWishlist(data['id_string'])
+            .then((result) => {
+                if (result) {
+                    likeButton.classList.remove("fa-regular");
+                    likeButton.classList.add("fa-solid");
+                } else {
+                    alert('Failed to add to wishlist');
+                }
+            });
         } else {
-            likeButton.classList.remove("fa-solid");
-            likeButton.classList.add("fa-regular");
-
-            // Backend Logic
+            removeFromWishlist(data['id_string'])
+            .then((result) => {
+                if (result) {
+                    likeButton.classList.remove("fa-solid");
+                    likeButton.classList.add("fa-regular");
+                } else {
+                    alert('Failed to remove from wishlist');
+                }
+            });
         }
     });
 
@@ -118,6 +128,51 @@ function formatHeading(heading) {
         headingArray[index] = word.charAt(0).toUpperCase() + word.slice(1);
     });
     return headingArray.join(' ');
+}
+
+async function addToWishlist(room_id) {
+    try {
+        const response = await fetch(URL + '/add-to-wishlist', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ id: room_id }),
+            credentials: 'include'
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        return true;
+    } catch (error) {
+        console.error('Error:', error);
+        return false; 
+    }
+}
+
+
+async function removeFromWishlist(room_id) {
+    try {
+        const response = await fetch(URL + '/remove-from-wishlist', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ id: room_id }),
+            credentials : 'include'
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return true;
+
+    } catch (error) {
+        console.error('Error:', error);
+        return false; 
+    }
 }
 
 document.addEventListener('DOMContentLoaded', function() {

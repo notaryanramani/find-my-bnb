@@ -3,5 +3,6 @@ CREATE TABLE IF NOT EXISTS users (
     name VARCHAR(100) NOT NULL,
     username VARCHAR(50) NOT NULL UNIQUE,
     email VARCHAR(100) NOT NULL UNIQUE,
-    password BYTEA NOT NULL
+    password BYTEA NOT NULL,
+    wishlist TEXT[] DEFAULT '{}',
 );

@@ -110,7 +110,7 @@ func (s *Server) userLoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := utils.GenerateToken(user)
+	token, err := utils.GenerateToken(user.Username)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -151,7 +151,7 @@ func (s *Server) autoLoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := utils.GenerateToken(user)
+	token, err := utils.GenerateToken(user.Username)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -244,6 +244,123 @@ func (s *Server) getRoomByIdHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(room)
+}
+
+func (s *Server) addToWishlistHandler(w http.ResponseWriter, r *http.Request) {
+	username, err := r.Cookie("username")
+	if err != nil {
+		http.Error(w, "No username found", http.StatusBadRequest)
+		return
+	}
+
+	idMap := make(map[string]string)
+	err = json.NewDecoder(r.Body).Decode(&idMap)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	id64, err := strconv.ParseInt(idMap["id"], 10, 64)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	err = s.store.User.AddRoomToWishlist(r.Context(), username.Value, id64)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+// removeFromWishlistHandler handles the remove room from wishlist request
+func (s *Server) removeFromWishlistHandler(w http.ResponseWriter, r *http.Request) {
+	username, err := r.Cookie("username")
+	if err != nil {
+		http.Error(w, "No username found", http.StatusBadRequest)
+		return
+	}
+
+	idMap := make(map[string]string)
+	err = json.NewDecoder(r.Body).Decode(&idMap)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	id64, err := strconv.ParseInt(idMap["id"], 10, 64)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	err = s.store.User.RemoveRoomFromWishlist(r.Context(), username.Value, id64)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func (s *Server) getWishlistHandler(w http.ResponseWriter, r *http.Request) {
+	username, err := r.Cookie("username")
+	if err != nil {
+		http.Error(w, "No username found", http.StatusBadRequest)
+		return
+	}
+
+	roomsIds, err := s.store.User.GetWishlist(r.Context(), username.Value)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	rooms, err := s.store.Room.GetByMultipleIDs(r.Context(), roomsIds)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(rooms)
+}
+
+// checkRoomExistsinWishlistHandler handles the check room exists in a user's wishlist
+func (s *Server) checkRoomExistsinWishlistHandler(w http.ResponseWriter, r *http.Request) {
+	username, err := r.Cookie("username")
+	if err != nil {
+		http.Error(w, "No username found", http.StatusBadRequest)
+		return
+	}
+
+	_, err = s.store.User.GetByUsername(r.Context(), username.Value)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	idString := chi.URLParam(r, "id")
+	id64, err := strconv.ParseInt(idString, 10, 64)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	exists, err := s.store.User.CheckRoomExistInWishlist(r.Context(), username.Value, id64)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if exists {
+		w.WriteHeader(http.StatusOK)
+	} else {
+		w.WriteHeader(http.StatusNotFound)
+	}
 }
 
 // vectorSearchHandler handles the vector search request

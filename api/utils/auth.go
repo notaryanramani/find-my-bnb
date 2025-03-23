@@ -8,7 +8,6 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/joho/godotenv"
-	"github.com/notaryanramani/find-my-bnb/api/store"
 )
 
 func getSecret() []byte {
@@ -27,9 +26,9 @@ func getSecret() []byte {
 
 var TokenSecret = getSecret()
 
-func GenerateToken(user *store.User) (string, error) {
+func GenerateToken(username string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"username": user.Username,
+		"username": username,
 		"exp": time.Now().Add(time.Hour * 24).Unix(),
 	})
 
