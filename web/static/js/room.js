@@ -3,8 +3,8 @@ import { updateNavBar } from './utils.js';
 import { classes, fields } from './constants.js';
 
 
-function getRoom(roomId) {
-    fetch(URL + `/rooms/${roomId}`)
+async function getRoom(roomId) {
+    await fetch(URL + `/rooms/${roomId}`)
     .then(response => response.json())
     .then(data => {
         console.log('Success:', data);
@@ -29,8 +29,6 @@ function createRoomCard(data) {
     img.classList.add(...classes.classImg.split(' '));
 
     imgContainer.appendChild(img);
-
-    
 
     // details container
     var detailsContainer = document.createElement('div');
@@ -58,6 +56,32 @@ function createRoomCard(data) {
         detailsContainer.appendChild(detailContainer);
     });
 
+    // Create a like button
+    var likeSpan = document.createElement('div');
+    likeSpan.className = "flex justify-center items-center";
+    var likeButton = document.createElement('i');
+    likeButton.id = 'like-button';
+    likeButton.className = "fa-regular fa-heart hover:cursor-pointer";
+    likeSpan.appendChild(likeButton);
+    detailsContainer.appendChild(likeSpan);
+
+    likeSpan.addEventListener('click', function() {
+        var likeButton = document.getElementById('like-button');
+        
+        if (likeButton.classList.contains("fa-regular")){
+            likeButton.classList.remove("fa-regular");
+            likeButton.classList.add("fa-solid");
+
+            // Backend Logic 
+        } else {
+            likeButton.classList.remove("fa-solid");
+            likeButton.classList.add("fa-regular");
+
+            // Backend Logic
+        }
+    });
+
+
     // append all the elements
     container.appendChild(imgContainer);
     container.appendChild(detailsContainer);
@@ -73,6 +97,7 @@ function createComponentContainer(headingValue, valueValue) {
 
     var heading = document.createElement('div');
     heading.classList.add(...classes.classDetailsHeadingComponent.split(' '));
+    headingValue = formatHeading(headingValue);
     heading.innerText = headingValue;
 
     var value = document.createElement('div');
@@ -83,6 +108,16 @@ function createComponentContainer(headingValue, valueValue) {
     componentContainer.appendChild(value);
 
     return componentContainer;
+}
+
+
+// Formats heading to be more readable: 'neighbourhood_overview' -> 'Neighbourhood Overview'
+function formatHeading(heading) {
+    var headingArray = heading.split('_');
+    headingArray.forEach((word, index) => {
+        headingArray[index] = word.charAt(0).toUpperCase() + word.slice(1);
+    });
+    return headingArray.join(' ');
 }
 
 document.addEventListener('DOMContentLoaded', function() {
