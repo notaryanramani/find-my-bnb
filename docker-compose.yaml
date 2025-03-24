@@ -19,8 +19,6 @@ services:
     build:
       context: ./embedder
       dockerfile: Dockerfile
-    environment:
-      DB_ADDR: postgres://go_backend:go_backend@host.docker.internal:5432/go_db?sslmode=disable
     container_name: go-embedder
     ports:
       - "5000:5000"
