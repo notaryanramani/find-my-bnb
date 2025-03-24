@@ -13,3 +13,6 @@ test:
 
 migrate-up:
 	@migrate -database $(DB_ADDR) -path db/migrations up
+
+migrate-down:
+	@migrate -database $(DB_ADDR) -path db/migrations down

@@ -15,16 +15,6 @@ services:
     networks:
       - mynet
 
-  embedder:
-    build:
-      context: ./embedder
-      dockerfile: Dockerfile
-    container_name: go-embedder
-    ports:
-      - "5000:5000"
-    networks:
-      - mynet
-  
   api:
     build:
       context: ./api
@@ -34,9 +24,21 @@ services:
       - "8080:8080"
     depends_on:
       - db 
-      - embedder
     networks:
       - mynet
+
+  embedder:
+    build:
+      context: ./embedder
+      dockerfile: Dockerfile
+    container_name: go-embedder
+    ports:
+      - "5000:5000"
+    networks:
+      - mynet
+    depends_on:
+      - db
+      - api
 
   web:
     build:
