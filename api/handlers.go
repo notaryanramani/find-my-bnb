@@ -158,10 +158,13 @@ func (s *Server) autoLoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.SetCookie(w, &http.Cookie{
-		Name:   "jwt-token",
-		Value:  token,
-		Path:   "/",
-		MaxAge: 86400,
+		Name:     "jwt-token",
+		Value:    token,
+		Path:     "/",
+		MaxAge:   86400,
+		HttpOnly: false,
+		SameSite: http.SameSiteLaxMode,
+		Secure:   false,
 	})
 
 	w.Header().Set("Content-Type", "application/json")
@@ -246,6 +249,7 @@ func (s *Server) getRoomByIdHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(room)
 }
 
+// addToWishlistHandler handles the add room to user's wishlist request
 func (s *Server) addToWishlistHandler(w http.ResponseWriter, r *http.Request) {
 	username, err := r.Cookie("username")
 	if err != nil {
@@ -305,6 +309,7 @@ func (s *Server) removeFromWishlistHandler(w http.ResponseWriter, r *http.Reques
 	w.WriteHeader(http.StatusOK)
 }
 
+// getWishlistHandler handles the get a user's wishlist request
 func (s *Server) getWishlistHandler(w http.ResponseWriter, r *http.Request) {
 	username, err := r.Cookie("username")
 	if err != nil {

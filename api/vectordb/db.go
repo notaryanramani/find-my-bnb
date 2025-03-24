@@ -9,7 +9,6 @@ import (
 	"strconv"
 	"sync"
 
-	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
 
@@ -38,11 +37,6 @@ type VectorSearchRequest struct {
 }
 
 func NewVectorDB() *VectorDB {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-
 	dimStr, ok := os.LookupEnv("EMBEDDING_DIM")
 	if !ok {
 		log.Fatal("EMBEDDING_DIM is not set in .env file")

@@ -1,0 +1,61 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:16.3
+    container_name: postgres-db-2
+    environment:
+      POSTGRES_USER: go_backend
+      POSTGRES_PASSWORD: go_backend
+      POSTGRES_DB: go_db
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - mynet
+
+  embedder:
+    build:
+      context: ./embedder
+      dockerfile: Dockerfile
+    environment:
+      DB_ADDR: postgres://go_backend:go_backend@host.docker.internal:5432/go_db?sslmode=disable
+    container_name: go-embedder
+    ports:
+      - "5000:5000"
+    networks:
+      - mynet
+  
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: go-api
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db 
+      - embedder
+    networks:
+      - mynet
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    container_name: go-web
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+    networks:
+      - mynet
+
+volumes:
+  postgres-data:
+
+networks:
+  mynet:
+    name: mynet-network
+    driver: bridge
